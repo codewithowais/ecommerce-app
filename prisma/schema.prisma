@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  role          Role     @relation(fields: [roleId], references: [id])
+  roleId        String
+  status        String
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  auditLogs     AuditLog[]
+}
+
+model Role {
+  id          String @id @default(cuid())
+  name        String
+  permissions Json
+  users       User[]
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorUser    User     @relation(fields: [actorUserId], references: [id])
+  actorUserId  String
+  action       String
+  entity       String
+  entityId     String
+  before       Json?
+  after        Json?
+  createdAt    DateTime @default(now())
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  title       String
+  subtitle    String?
+  description String?
+  status      String
+  seo         Json?
+  tags        String[]
+  variants    ProductVariant[]
+  images      ProductImage[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProductVariant {
+  id             String          @id @default(cuid())
+  product        Product         @relation(fields: [productId], references: [id])
+  productId      String
+  sku            String          @unique
+  optionValues   Json
+  price          Decimal
+  compareAtPrice Decimal?
+  costPrice      Decimal?
+  inventory      InventoryItem?
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  url       String
+  altText   String?
+  position  Int?
+}
+
+model InventoryItem {
+  id                 String              @id @default(cuid())
+  variant            ProductVariant      @relation(fields: [variantId], references: [id])
+  variantId          String @unique
+  trackInventory     Boolean
+  lowStockThreshold  Int?
+  movements          InventoryMovement[]
+}
+
+model InventoryMovement {
+  id              String         @id @default(cuid())
+  inventoryItem   InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+  inventoryItemId String
+  delta           Int
+  reason          String
+  referenceType   String?
+  referenceId     String?
+  metadata        Json?
+  createdAt       DateTime @default(now())
+}
+
+model Promotion {
+  id               String   @id @default(cuid())
+  code             String?  @unique
+  type             String
+  value            Decimal?
+  usageLimit       Int?
+  perCustomerLimit Int?
+  minSpend         Decimal?
+  startsAt         DateTime?
+  endsAt           DateTime?
+  rules            Json?
+  createdAt        DateTime @default(now())
+}
