@@ -4,7 +4,7 @@ Early execution scaffold for the single-store commerce platform. The repository 
 
 - Fastify API skeleton with health, auth, catalog, inventory, orders, customers, content, promotions, reviews, reporting, Growth Studio, storefront, and webhook routes.
 - RBAC-aware middleware hook and request context enrichment for request IDs and bearer token decoding.
-- Prisma schema aligned to core domain tables (users/roles/audit logs, products/variants/images, inventory ledger, promotions).
+- Prisma schema aligned to core domain tables (users/roles/audit logs, products/variants/images, categories/collections, inventory ledger, promotions, carts/wishlists, customers, orders/payments/shipments, CMS pages/navigation/banners).
 - TypeScript toolchain with dev/build scripts.
 
 ## Getting started
@@ -33,6 +33,14 @@ Early execution scaffold for the single-store commerce platform. The repository 
 - Storefront catalog: `curl "http://localhost:3000/storefront/catalog?search=tee"`
 - Checkout: `curl -X POST http://localhost:3000/storefront/checkout -H 'Content-Type: application/json' -d '{"email":"test@example.com","items":[{"sku":"SKU-1","quantity":1,"price":1999}],"shippingAddress":{"line1":"123 Example"},"paymentMethod":"card"}'`
 - Payment webhook (expects signature + idempotency header): `curl -X POST http://localhost:3000/webhooks/payments -H 'x-signature: replace-me' -H 'idempotency-key: test-key'`
+
+### Domain coverage quick-reference
+- Catalog: products with variants, images, categories (tree), collections (manual/rule-based)
+- Inventory: append-only ledger per variant with low-stock thresholds
+- Orders: lifecycle statuses, payments, refunds, shipments, invoices, timelines
+- Customers: profiles, addresses, segments, exports, wishlists, carts
+- Content: pages, banners, navigation entries
+- Growth & Promotions: coupons/automatic discounts, Growth Studio analytics stubs
 
 ## Available feature stubs
 - **Auth**: login + refresh token issuance

@@ -12,6 +12,13 @@ interface OrderPayload {
   notes?: string;
 }
 
+interface ShipmentPayload {
+  carrier?: string;
+  service?: string;
+  trackingCode?: string;
+  items?: Array<{ sku: string; quantity: number }>;
+}
+
 export async function registerOrdersRoutes(app: FastifyInstance) {
   app.get('/', {
     preHandler: app.authorize({ anyOf: ['orders.read'] })
@@ -27,7 +34,7 @@ export async function registerOrdersRoutes(app: FastifyInstance) {
   app.get<{ Params: { id: string } }>('/:id', {
     preHandler: app.authorize({ anyOf: ['orders.read'] })
   }, async (request, reply) => {
-    reply.send({ id: request.params.id, status: 'processing', payments: [], shipments: [] });
+    reply.send({ id: request.params.id, status: 'processing', payments: [], shipments: [], timeline: [] });
   });
 
   app.post<{ Params: { id: string }; Body: { status: OrderStatus; note?: string } }>('/:id/status', {
@@ -48,6 +55,20 @@ export async function registerOrdersRoutes(app: FastifyInstance) {
       reply.code(201).send({ id: nanoid(), orderId: id, amount: request.body.amount, status: 'pending' });
     }
   );
+
+  app.post<{ Params: { id: string }; Body: ShipmentPayload }>(
+    '/:id/shipments',
+    { preHandler: app.authorize({ anyOf: ['orders.write'] }) },
+    async (request, reply) => {
+      reply.code(201).send({ id: nanoid(), orderId: request.params.id, ...request.body, status: 'shipped' });
+    }
+  );
+
+  app.get<{ Params: { id: string } }>('/:id/invoice', {
+    preHandler: app.authorize({ anyOf: ['orders.read'] })
+  }, async (request) => {
+    return { orderId: request.params.id, url: 'https://example.com/invoices/demo.pdf' };
+  });
 
   app.get<{ Params: { id: string } }>('/:id/timeline', {
     preHandler: app.authorize({ anyOf: ['orders.read'] })
