@@ -2,7 +2,7 @@
 
 Early execution scaffold for the single-store commerce platform. The repository now includes:
 
-- Fastify API skeleton with health, auth, catalog, inventory, orders, customers, content, promotions, reviews, reporting, and Growth Studio routes.
+- Fastify API skeleton with health, auth, catalog, inventory, orders, customers, content, promotions, reviews, reporting, Growth Studio, storefront, and webhook routes.
 - RBAC-aware middleware hook and request context enrichment for request IDs and bearer token decoding.
 - Prisma schema aligned to core domain tables (users/roles/audit logs, products/variants/images, inventory ledger, promotions).
 - TypeScript toolchain with dev/build scripts.
@@ -16,15 +16,23 @@ Early execution scaffold for the single-store commerce platform. The repository 
 2. Copy `.env.example` to `.env` and set values for your environment. Key variables:
    - `PORT`, `HOST`, `LOG_LEVEL`
    - `DATABASE_URL` (PostgreSQL), `JWT_SECRET`
-   - `REDIS_URL` (rate limiting, queues), `PAYMENT_WEBHOOK_SECRET`, `PAYMENT_PROVIDER_KEY`
+   - `REDIS_URL` (rate limiting, queues), `RATE_LIMIT_PER_MINUTE`, `SESSION_REDIS_PREFIX`
+   - `ACCESS_TOKEN_TTL`, `REFRESH_TOKEN_TTL`, `COOKIE_SECRET` (if cookie auth)
+   - `PAYMENT_WEBHOOK_SECRET`, `PAYMENT_WEBHOOK_TOLERANCE_MS`, `PAYMENT_PROVIDER_KEY`
    - `SMTP_*` and `EMAIL_FROM` for notifications
-   - `FILE_STORAGE_*` for image uploads (S3/MinIO compatible)
-   - `FRONTEND_URL` and `ADMIN_URL` for CORS/links
+   - `FILE_STORAGE_*` and `FILE_STORAGE_PUBLIC_URL` for image uploads (S3/MinIO compatible)
+   - `FRONTEND_URL`, `ADMIN_URL`, `CORS_ALLOWED_ORIGINS` for CORS/links
 3. Run the API in dev mode
    ```bash
    npm run dev
    ```
 4. Visit `http://localhost:3000/health` to verify readiness.
+
+### Manual smoke checks (stubs)
+- Health: `curl http://localhost:3000/health`
+- Storefront catalog: `curl "http://localhost:3000/storefront/catalog?search=tee"`
+- Checkout: `curl -X POST http://localhost:3000/storefront/checkout -H 'Content-Type: application/json' -d '{"email":"test@example.com","items":[{"sku":"SKU-1","quantity":1,"price":1999}],"shippingAddress":{"line1":"123 Example"},"paymentMethod":"card"}'`
+- Payment webhook (expects signature + idempotency header): `curl -X POST http://localhost:3000/webhooks/payments -H 'x-signature: replace-me' -H 'idempotency-key: test-key'`
 
 ## Available feature stubs
 - **Auth**: login + refresh token issuance

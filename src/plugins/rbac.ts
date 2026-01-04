@@ -9,6 +9,7 @@ export interface PermissionCheckOptions {
 declare module 'fastify' {
   interface FastifyInstance {
     authorize: (options: PermissionCheckOptions) => (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    authorizeOptional: () => (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }
 
@@ -26,6 +27,12 @@ export const rbacPlugin = fp(async (fastify) => {
         reply.code(403).send({ message: 'forbidden' });
         return;
       }
+    };
+  });
+
+  fastify.decorate('authorizeOptional', () => {
+    return async (_request, _reply) => {
+      // Intentionally allows anonymous users; authentication/permission checks can be applied downstream.
     };
   });
 });

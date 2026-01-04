@@ -13,8 +13,10 @@ import { registerReviewsRoutes } from './modules/reviews/routes.js';
 import { registerContentRoutes } from './modules/content/routes.js';
 import { registerReportsRoutes } from './modules/reports/routes.js';
 import { registerStaffRoutes } from './modules/staff/routes.js';
+import { registerStorefrontRoutes } from './modules/storefront/routes.js';
 import { requestContextPlugin } from './plugins/request-context.js';
 import { rbacPlugin } from './plugins/rbac.js';
+import { registerWebhookRoutes } from './routes/webhooks.js';
 
 export function buildApp(): FastifyInstance {
   const app = Fastify({
@@ -47,6 +49,8 @@ export function buildApp(): FastifyInstance {
   app.register(registerContentRoutes, { prefix: '/content' });
   app.register(registerReportsRoutes, { prefix: '/reports' });
   app.register(registerStaffRoutes, { prefix: '/staff' });
+  app.register(registerStorefrontRoutes, { prefix: '/storefront' });
+  app.register(registerWebhookRoutes, { prefix: '/webhooks' });
 
   return app;
 }
