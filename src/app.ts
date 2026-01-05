@@ -1,6 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
-import rateLimit from 'fastify-rate-limit';
-import fastifyJwt from 'fastify-jwt';
+import rateLimit from '@fastify/rate-limit';
+import fastifyJwt from '@fastify/jwt';
 import { registerHealthRoutes } from './routes/health.js';
 import { registerAuthRoutes } from './modules/auth/routes.js';
 import { registerCatalogRoutes } from './modules/catalog/routes.js';
